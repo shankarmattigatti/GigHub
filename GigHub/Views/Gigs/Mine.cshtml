@@ -1,0 +1,69 @@
+﻿@model IEnumerable<GigHub.Core.Models.Gig>
+@{
+    ViewBag.Title = "My Upcoming Gigs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>My Upcoming Gigs</h2>
+<ul class="gigs voffset4">
+    @foreach (var gig in Model)
+    {
+        <li>
+            <div class="date">
+                <div class="month">
+                    @gig.DateTime.ToString("MMM")
+                </div>
+                <div class="day">
+                    @gig.DateTime.ToString("d ")
+                </div>
+            </div>
+            <div class="details">
+                <span class="artist">
+                    @gig.Venue
+                </span>
+                <span class="genre">
+                    @gig.Genre.Name
+                </span>
+                <div class="actions">
+                    <a href="@Url.Action("Edit", "Gigs", new { id = gig.Id })">
+                    Edit
+                    </a> |
+                    <a  href="#" class="js-cancel-gig" data-gig-id="@gig.Id">Cancel</a>
+                </div>
+            </div>
+        </li>
+    }
+</ul>
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".js-cancel-gig").click(function (e) {
+                var link = $(e.target);
+                swal({
+                    title: "Are you sure you want to cancel this gig?",
+                    type: "warning",
+                    confirmButtonText: "Yes",
+                    confirmButtonColor: "#d33",
+                    showCancelButton: true,
+                    cancelButtonText: "No",
+                    cancelButtonColor: "#3085d6",
+                }).then(function () {
+                    $.ajax({
+                        url: "/api/Gigs/" + link.attr("data-gig-id"),
+                        method: "DELETE"
+                    })
+                    .done(function () {
+                        link.parents("li").fadeOut(function () {
+                            $(this).remove();
+                        })
+                    })
+                    .fail(function () {
+                        swal(response.error);   //On any error, show the message to the user
+                    })
+                });
+            });
+        });
+    </script>
+}
+
